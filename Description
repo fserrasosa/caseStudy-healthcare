@@ -1,0 +1,30 @@
+Introduction:
+We experimented our approach within a regional research project in collaboration with the Regional University Hospital Center of the city of Tours, in France. Our goal is to test CaDQM within a real small-sized project.
+
+Application context:
+The project concerns the preparation and analysis of medical data for the stratification of Amyotrophic Lateral Sclerosis (ALS) patients. ALS is a neurodegenerative disease characterized by the death of motor neurons in the motor cortex and the anterior horn of the spinal cord with a rapidly fatal prognosis in less than 3 years.
+While no reliable method is routinely used to establish a diagnosis or propose a prognosis for ALS patients, the general strategy pushes medical researchers to acquire ever more clinical, biological and imaging data and encourages them to resort to artificial intelligence approaches to structure and exploit this multiple data. In the healthcare domain, data preparation is a fundamental upstream work for patient stratification and survival analysis.
+
+Dataset:
+The source dataset contains demographic, clinical and biological data about 1660 local patients diagnosed with ALS from 1991 to 2022. Patients records were anonymized and exported as CSV files.
+The main one describes patients, one line per patient, including general demographics (e.g. sex, dob and profession), diagnosis (e.g. zone, symptoms, age at diagnosis) and also clinical indicators (e.g. ALS-FRS score, body mass index and cardiovascular fitness) periodically measured during medical appointments. The latter are represented via multiple columns instead of time series (35 columns are used for each type of indicator), resulting in a large number of columns (478) with a big amount of null values. The other files describes further clinical and biological results.
+
+Preliminary work:
+A preliminary stratification analysis was carried by a data scientist, who also dealt with data preparation. He did not follow a particular DQ methodology but implemented necessary data profiling and transformation activities within an ETL project. 
+
+Context application:
+Applying CaDQM, in the "Elicitation stage", we define the context of the dataset by identifying an initial set of context components. According to the contextual information collected with the domain experts (doctors), they are the application domain (AP: healthcare), users characteristics (UC1: medical researchers, UC2: data scientists), task at hand (TH: the stratification of ALS), business rules (e.g. BR1: 0 ≤ ALS ≤ 48), and data filtering needs (e.g. FN: undiagnosed patients are discarded). The "User Requirements Analysis stage" was not executed as doctors felt not able to express requirements, but they participated to data analysis by answering our questions. So a data-based approach was applied. At the "Data Analysis stage", data profiling activities were carried out, where patterns and null values were looked for in the dataset. New context components were obtained, in particular new DQ requirements, for instance, 
+R1: date format must be DD/MM/YYYY, 
+R2: biological values with many null values are discarded, 
+R3: each patient must have at least 5 medical appointments, 
+R4: possible values for diagnosis zone are: Spinal, Bulbar and Respiratory, 
+R5: appointment dates (represented in several continuous columns) must be increasing, 
+R6: ALSSFR scores (also represented in several continuous columns) must be decreasing, and R7: outliers must be discarded.
+
+At the "DQ model definition stage", we selected DQ dimensions based on the context and on the results obtained at the Data Analysis stage. Initially, the context suggests 3 dimensions: accuracy, completeness and consistency. In particular, a detailed analysis of the context components allowed us to select more specific facets (called DQ factors) of each DQ dimension, \flavia{for instance:  \textit{accuracy} (syntactic accuracy from R4, and precision from R1), \textit{completeness} (density from FN and R2), \textit{consistency} (domain integrity from BR1 and R4, intra-relation integrity from R5 and R6, and inter-relation 
+integrity from R3).} For each DQ dimension, we defined DQ metrics, and implemented measuring methods that take parameters from some context components. 
+%For example, Table~\ref{tab:pseudoCode} presents the pseudo-code of one of the methods (named CheckDomainRule, which checks whether values of a numerical attribute are within a given range. It is used to check whether business rule BR1 (a context component) is satisfied. Measurement methods were implemented in python within a Jupiter notebook.
+Finally, the DQ model includes 3 DQ dimensions, their \flavia{DQ factors} (5 different), and several DQ metrics and measurement methods. The DQ measurement stage executed the measurement methods, collecting DQ metadata and then, the \textit{DQ assessment stage,} was performed based on DQ metadata and reference values (e.g. R3 asks for at least 5 appointments). DQ assessment results helped to identify improvement needs. Based on this a preliminary improvement plan was defined and is being implemented within an ETL tool.
+
+Results: 
+The application of the first 2 phases of CaDQM, DQ Planning and DQ Assessment, with an explicit use of context allowed a more robust analysis of data, leading to the identification of more DQ problems, compared to the preliminary work of the data analyst. In particular, having the data context helped in the execution of data profiling tasks, since it allowed the identification of relevant data and the establishment of priorities among them. Furthermore, the use of CaDQM allowed the definition of a DQ model funded on context, which perfectly documents DQ assessment goals and is a valuable input for the setting and implementation of an improvement plan. Although doctors do not explicitly stated DQ requirements, they valued data analysis results and validated (and complemented) the obtained context components and the DQ model that resulted. Once the improvement phase finished, a new stratification analysis will be performed, allowing for more user feedback.
